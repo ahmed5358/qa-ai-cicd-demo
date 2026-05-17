@@ -13,6 +13,7 @@ const {
 const qaSummaryPath = path.join(__dirname, '..', 'test-results', 'qa-summary.json');
 const aiSummaryPath = path.join(__dirname, '..', 'test-results', 'ai-summary.txt');
 const repairSuggestionPath = path.join(__dirname, '..', 'generated', 'repair-suggestion.json');
+const memoryContextPath = path.join(__dirname, '..', 'generated', 'memory-context.json');
 
 if (!AIRTABLE_TOKEN) {
   console.error('Erreur : AIRTABLE_TOKEN est manquant dans .env');
@@ -35,6 +36,19 @@ if (!fs.existsSync(qaSummaryPath)) {
   process.exit(1);
 }
 
+function readJsonIfExists(filePath, fallback = {}) {
+  if (!fs.existsSync(filePath)) {
+    return fallback;
+  }
+
+  try {
+    return JSON.parse(fs.readFileSync(filePath, 'utf-8'));
+  } catch (error) {
+    console.warn(`Impossible de lire le fichier JSON : ${filePath}`);
+    return fallback;
+  }
+}
+
 const base = new Airtable({ apiKey: AIRTABLE_TOKEN }).base(AIRTABLE_BASE_ID);
 
 const qaSummary = JSON.parse(fs.readFileSync(qaSummaryPath, 'utf-8'));
@@ -43,9 +57,18 @@ const aiSummary = fs.existsSync(aiSummaryPath)
   ? fs.readFileSync(aiSummaryPath, 'utf-8')
   : '';
 
-const repairSuggestion = fs.existsSync(repairSuggestionPath)
-  ? JSON.parse(fs.readFileSync(repairSuggestionPath, 'utf-8'))
-  : null;
+const repairSuggestion = readJsonIfExists(repairSuggestionPath, null);
+
+const memoryContext = readJsonIfExists(memoryContextPath, {
+  errorSignature: '',
+  similarIncidentFound: false,
+  memoryConfidence: 'NONE',
+  previousRecordId: '',
+  previousFix: '',
+  previousRootCause: '',
+  previousOccurrences: 0,
+  memoryNote: 'Aucun contexte mémoire disponible.',
+});
 
 const firstFailedTest = qaSummary.failedTests?.[0] || null;
 
@@ -68,6 +91,13 @@ function normalizeStatus(decision) {
   return 'NEEDS_REVIEW';
 }
 
+function normalizeMemoryConfidence(value) {
+  const allowedValues = ['HIGH', 'MEDIUM', 'LOW', 'NONE'];
+  const normalized = String(value || 'NONE').toUpperCase();
+
+  return allowedValues.includes(normalized) ? normalized : 'NONE';
+}
+
 function buildIncidentName() {
   if (firstFailedTest) {
     return `${qaSummary.decision} - ${firstFailedTest.title}`;
@@ -76,31 +106,61 @@ function buildIncidentName() {
   return `${qaSummary.decision} - ${qaSummary.project}`;
 }
 
+function getSuggestedFix() {
+  if (Array.isArray(repairSuggestion?.suggestedFixes)) {
+    return repairSuggestion.suggestedFixes.join('\n');
+  }
+
+  if (repairSuggestion?.suggestedFix) {
+    return repairSuggestion.suggestedFix;
+  }
+
+  if (repairSuggestion?.fix) {
+    return repairSuggestion.fix;
+  }
+
+  return '';
+}
+
 async function runAirtableMemoryAgent() {
   const fields = {
     Name: buildIncidentName(),
     Project: qaSummary.project || 'QA AI CI/CD Demo - SauceDemo',
+
     'Execution Date': qaSummary.executionDate
       ? qaSummary.executionDate.split('T')[0]
       : new Date().toISOString().split('T')[0],
+
     Decision: qaSummary.decision || 'UNKNOWN',
     'Risk Level': normalizeRiskLevel(qaSummary.riskLevel),
     'Failure Type': repairSuggestion?.failureType || 'UNKNOWN',
     'Test Name': firstFailedTest?.title || '',
     'Error Message': firstFailedTest?.error || '',
     'Root Cause': repairSuggestion?.rootCause || '',
-    'Suggested Fix': Array.isArray(repairSuggestion?.suggestedFixes)
-      ? repairSuggestion.suggestedFixes.join('\n')
-      : '',
+    'Suggested Fix': getSuggestedFix(),
     Status: normalizeStatus(qaSummary.decision),
     Occurrences: 1,
     'AI Summary': aiSummary,
     'Priorité': normalizePriority(qaSummary.riskLevel),
+
+    // Mémoire intelligente Airtable
+    'Error Signature': memoryContext.errorSignature || '',
+    'Similar Incident Found': Boolean(memoryContext.similarIncidentFound),
+    'Previous Fix': memoryContext.previousFix || '',
+    'Memory Confidence': normalizeMemoryConfidence(memoryContext.memoryConfidence),
+    'Previous Record ID': memoryContext.previousRecordId || '',
+    'Memory Note': memoryContext.memoryNote || '',
   };
 
   console.log('==============================');
   console.log('08_AGENT_MEMORY_AIRTABLE');
   console.log('==============================');
+
+  console.log('Contexte mémoire :');
+  console.log(`Similar incident found : ${Boolean(memoryContext.similarIncidentFound)}`);
+  console.log(`Memory confidence : ${normalizeMemoryConfidence(memoryContext.memoryConfidence)}`);
+  console.log(`Previous record ID : ${memoryContext.previousRecordId || 'N/A'}`);
+
   console.log('Création de l’incident dans Airtable...');
 
   const createdRecords = await base(AIRTABLE_TABLE_NAME).create([
