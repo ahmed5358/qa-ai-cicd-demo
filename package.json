@@ -8,7 +8,7 @@
     "qa:analyze": "node analyze-results.js",
     "qa:ai": "node generate-ai-summary.js",
     "qa:slack": "node send-slack-summary.js",
-    "qa:pipeline": "playwright test || echo Tests failed but continuing && node analyze-results.js && node generate-ai-summary.js && node send-slack-summary.js",
+    "qa:pipeline": "playwright test || echo Tests failed but continuing && node analyze-results.js && node generate-ai-summary.js && node send-slack-summary.js && node agents/08-airtable-memory-agent.js",
     "agentic:prp": "node agents/01-prp-agent.js",
     "agentic:design": "node agents/02-test-design-agent.js",
     "agentic:generate": "node agents/03-playwright-generator-agent.js",
