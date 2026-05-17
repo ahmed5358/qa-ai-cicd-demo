@@ -25,7 +25,7 @@
   "agentic:repair:suggest": "node agents/06-repair-suggestion-agent.js",
   "agentic:repair:approve": "node agents/07-repair-approval.js",
   "agentic:repair": "node agents/06-repair-suggestion-agent.js && node agents/07-repair-approval.js",
-
+  "agentic:memory:lookup": "node agents/07b-memory-lookup-agent.js",
   "agentic:memory": "node agents/08-airtable-memory-agent.js"
 },
   "keywords": [
