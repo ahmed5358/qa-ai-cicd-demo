@@ -1,0 +1,42 @@
+{
+  "name": "qa-ai-cicd-demo",
+  "version": "1.0.0",
+  "description": "Prototype local QA/CI-CD augmenté par l'IA avec Playwright, OpenAI et Slack",
+  "main": "index.js",
+  "scripts": {
+    "test": "playwright test",
+    "qa:analyze": "node analyze-results.js",
+    "qa:ai": "node generate-ai-summary.js",
+    "qa:slack": "node send-slack-summary.js",
+    "qa:pipeline": "playwright test || echo Tests failed but continuing && node analyze-results.js && node generate-ai-summary.js && node send-slack-summary.js",
+    "agentic:prp": "node agents/01-prp-agent.js",
+    "agentic:design": "node agents/02-test-design-agent.js",
+    "agentic:generate": "node agents/03-playwright-generator-agent.js",
+    "agentic:review": "node agents/04-script-review-agent.js",
+    "agentic:approve": "node agents/05-human-approval.js",
+    "agentic:prepare": "node agents/01-prp-agent.js && node agents/02-test-design-agent.js && node agents/03-playwright-generator-agent.js && node agents/04-script-review-agent.js",
+    "agentic:test": "playwright test tests/saucedemo.generated.spec.js || echo Generated test failed but continuing",
+    "agentic:repair": "node agents/06-repair-suggestion-agent.js && node agents/07-repair-approval.js",
+    "agentic:report": "node analyze-results.js && node generate-ai-summary.js && node send-slack-summary.js"
+  },
+  "keywords": [
+    "qa",
+    "playwright",
+    "ai",
+    "cicd",
+    "slack",
+    "automation"
+  ],
+  "author": "Ahmed",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "@playwright/test": "^1.60.0",
+    "@types/node": "^25.7.0"
+  },
+  "dependencies": {
+    "airtable": "^0.12.2",
+    "dotenv": "^17.4.2",
+    "openai": "^6.37.0"
+  }
+}

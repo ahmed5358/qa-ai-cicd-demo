@@ -1,0 +1,25 @@
+# Dependencies
+node_modules/
+
+# Environment secrets
+.env
+.env.*
+
+# Playwright outputs
+test-results/
+playwright-report/
+blob-report/
+
+# Generated runtime files
+generated/*.spec.js
+generated/*.json
+generated/*.txt
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/

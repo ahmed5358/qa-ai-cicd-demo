@@ -1,0 +1,35 @@
+{
+  "projectName": "QA AI CI/CD Demo - SauceDemo",
+  "applicationUnderTest": {
+    "name": "SauceDemo",
+    "url": "https://www.saucedemo.com/"
+  },
+  "businessNeed": "Vérifier qu'un utilisateur standard peut se connecter, ajouter un produit au panier et finaliser une commande avec succès.",
+  "targetUser": "Utilisateur standard e-commerce",
+  "businessContext": "Le parcours login → ajout panier → checkout est critique car il représente le parcours principal d'achat. Si ce parcours échoue, l'utilisateur ne peut pas finaliser sa commande.",
+  "expectedOutcome": "L'utilisateur doit voir une confirmation de commande après avoir terminé le checkout.",
+  "constraints": [
+    "Utiliser Playwright",
+    "Exécuter les tests sur Chromium",
+    "Utiliser SauceDemo comme application de démonstration",
+    "Générer des tests lisibles et maintenables",
+    "Prévoir une validation du script avant exécution"
+  ],
+  "knownTestData": {
+    "username": "standard_user",
+    "password": "secret_sauce",
+    "firstName": "Ahmed",
+    "lastName": "QA",
+    "postalCode": "69000"
+  },
+  "qualityGoals": [
+    "Transformer le besoin métier en critères testables",
+    "Générer un plan de test clair",
+    "Générer un script Playwright contrôlable",
+    "Valider le script avant exécution",
+    "Exécuter les tests dans Docker",
+    "Analyser les erreurs avec IA",
+    "Mémoriser les incidents",
+    "Notifier l'équipe dans Slack avec une décision GO / NO GO"
+  ]
+}
