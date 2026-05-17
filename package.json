@@ -17,7 +17,8 @@
     "agentic:prepare": "node agents/01-prp-agent.js && node agents/02-test-design-agent.js && node agents/03-playwright-generator-agent.js && node agents/04-script-review-agent.js",
     "agentic:test": "playwright test tests/saucedemo.generated.spec.js || echo Generated test failed but continuing",
     "agentic:repair": "node agents/06-repair-suggestion-agent.js && node agents/07-repair-approval.js",
-    "agentic:report": "node analyze-results.js && node generate-ai-summary.js && node send-slack-summary.js"
+    "agentic:report": "node analyze-results.js && node generate-ai-summary.js && node send-slack-summary.js && node agents/08-airtable-memory-agent.js",
+    "agentic:memory": "node agents/08-airtable-memory-agent.js"
   },
   "keywords": [
     "qa",
